@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "script2chat",
+  "version": "${version}",
+  "name": "Script 2 Chat",
+  "description": "https://www.youtube.com/watch?v=ub82Xb1C8os",
+  "authors": [
+    "Perzan"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Perzan",
+    "sources": "https://github.com/Perzan/script2chat-fabric"
+  },
+  "license": "GNU GPLv3",
+  "icon": "assets/script2chat/icon.png",
+  "environment": "*",
+  "mixins": [
+    "script2chat.client.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  },
+  "suggests": {
+  }
+}

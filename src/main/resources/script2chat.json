@@ -1,0 +1,9 @@
+{
+    "servers": {
+        "examplemc.net": {
+            "script":"/home/user/bin/examplemc.net",
+            "out":true,
+            "err":false
+        }
+    }
+}
