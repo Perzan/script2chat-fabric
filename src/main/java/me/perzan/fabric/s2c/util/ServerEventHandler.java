@@ -149,7 +149,7 @@ public class ServerEventHandler {
                 return;
             }
 
-            if (config.servers != null) {
+            if (config != null && config.servers != null) {
                 ServerConfig serverConfig = config.servers.get(server.address.toLowerCase());
 
                 if (serverConfig != null && serverConfig.script != null) {
