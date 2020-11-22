@@ -143,16 +143,18 @@ public class ServerEventHandler {
                 client.player.sendMessage(Text.of(jpe.getMessage()), false);
                 return;
             }
-                
-            ServerConfig serverConfig = config.servers.get(server.address.toLowerCase());
 
-            if (serverConfig != null && serverConfig.script != null) {
-                try {
-                    this.session = new Session(serverConfig, client.player);
-                    session.start();
-                } catch (IOException ioe) {
-                    ioe.printStackTrace();
-                    return;
+            if (config.servers != null) {
+                ServerConfig serverConfig = config.servers.get(server.address.toLowerCase());
+
+                if (serverConfig != null && serverConfig.script != null) {
+                    try {
+                        this.session = new Session(serverConfig, client.player);
+                        session.start();
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                        return;
+                    }
                 }
             }
         }
