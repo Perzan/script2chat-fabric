@@ -2,16 +2,13 @@ package me.perzan.fabric.s2c.util;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Scanner;
 
 import com.google.gson.Gson;
@@ -84,24 +81,6 @@ public class ServerEventHandler {
         }
     }
 
-    static final int BUFFER_SIZE = 8192;
-
-    static long transfer(InputStream input, OutputStream output) throws IOException {
-        Objects.requireNonNull(input, "arg0");
-        Objects.requireNonNull(output, "arg1");
-
-        long total = 0;
-        int read;
-        byte[] buffer = new byte[BUFFER_SIZE];
-
-        while ((read = input.read(buffer)) > -1) {
-            total += read;
-            output.write(buffer, 0, read);
-        }
-
-        return total;
-    }
-
     Session session;
 
     static final Gson GSON = new Gson();
@@ -151,13 +130,4 @@ public class ServerEventHandler {
         if (session != null)
             session.close();
     }
-
-    /*
-
-    @Inject(at = @At("RETURN"), method = "remove")
-    private void remove(ServerPlayerEntity player, CallbackInfo ci) {
-        
-    }
-
-    */
 }
