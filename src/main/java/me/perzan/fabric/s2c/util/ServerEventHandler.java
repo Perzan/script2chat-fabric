@@ -24,7 +24,6 @@ import net.minecraft.client.network.ServerInfo;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
 public class ServerEventHandler {
 
@@ -103,30 +102,12 @@ public class ServerEventHandler {
         return total;
     }
 
-    static InputStream resource() throws IOException {
-        return MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("script2chat", "script2chat.json")).getInputStream();
-    }
-
     Session session;
 
     static final Gson GSON = new Gson();
     public void onGameJoin(GameJoinS2CPacket packet) {
         Path configPath = FabricLoader.getInstance().getConfigDir().resolve("script2chat.json");
         if (!Files.exists(configPath)) {
-            try {
-                Files.createDirectories(configPath.getParent());
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
-                return;
-            }
-
-            try (InputStream resource = resource(); OutputStream output = Files.newOutputStream(configPath)) {
-                transfer(resource, output);
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
-                return;
-            }
-
             return;
         }
         
