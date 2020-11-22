@@ -2,13 +2,13 @@ package me.perzan.fabric.s2c.util;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Scanner;
 
 import com.google.gson.Gson;
@@ -34,54 +34,47 @@ public class ServerEventHandler {
         Map<String, ServerConfig> servers;
     }
 
-    static final long SLEEP = 10;
-
-    class Session extends Thread implements Closeable {
-
+    static class Session implements Closeable {
         final Process process;
         final ClientPlayerEntity player;
-        final List<Scanner> scanners = new ArrayList<>();
 
         Session(ServerConfig config, ClientPlayerEntity player) throws IOException {
             this.process = Runtime.getRuntime().exec(config.script);
             this.player = player;
 
-            if (config.out) scanners.add(new Scanner(process.getInputStream()));
-            if (config.err) scanners.add(new Scanner(process.getErrorStream()));
+            if (config.out) new ScannerThread(process.getInputStream()).start();
+            if (config.err) new ScannerThread(process.getErrorStream()).start();
         }
 
-        @Override
-        public void run() {
-            while (!scanners.isEmpty()) {
-                try {
-                    Thread.sleep(SLEEP);
-                    loop();
-                } catch (InterruptedException e) {
-                    return;
-                }
+        class ScannerThread extends Thread {
+            final Scanner scanner;
+
+            ScannerThread(InputStream input) {
+                Objects.requireNonNull(input, "arg0");
+                this.scanner = new Scanner(input);
             }
 
-            player.sendMessage(Text.of("[Script2Chat] Process terminated with an exit code of " + process.exitValue()), false);
-        }
-
-        void loop() {
-            for (Scanner scanner : new ArrayList<>(scanners)) {
-                if (scanner.hasNextLine()) {
+            @Override
+            public void run() {
+                while (scanner.hasNextLine())
                     player.sendChatMessage(scanner.nextLine());
-                } else {
-                    scanners.remove(scanner);
-                }
             }
         }
 
         @Override
         public void close() {
-            this.interrupt();
             process.destroy();
         }
     }
 
     Session session;
+
+    void stop() {
+        if (session == null) return;
+
+        session.close();
+        session = null;
+    }
 
     static final Gson GSON = new Gson();
     public void onGameJoin(GameJoinS2CPacket packet) {
@@ -94,8 +87,7 @@ public class ServerEventHandler {
         ServerInfo server = client.getCurrentServerEntry();
         
         if (server != null) {
-            if (session != null)
-                session.close();
+            stop();
 
             ScriptConfig config;
             try (Reader reader = new InputStreamReader(Files.newInputStream(configPath))) {
@@ -115,7 +107,6 @@ public class ServerEventHandler {
                 if (serverConfig != null && serverConfig.script != null) {
                     try {
                         this.session = new Session(serverConfig, client.player);
-                        session.start();
                     } catch (IOException ioe) {
                         ioe.printStackTrace();
                         return;
@@ -127,7 +118,6 @@ public class ServerEventHandler {
     // public void onActivate(Function<Player, Function<String, Consumer<List<String>>>>) 
 
 	public void onDisconnect(DisconnectS2CPacket packet) {
-        if (session != null)
-            session.close();
+        stop();
     }
 }
